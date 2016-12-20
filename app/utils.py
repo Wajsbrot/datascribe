@@ -88,11 +88,11 @@ def test_marginal_sums(contingency_table, threshold=5):
     return np.all(np.greater(expected_frequencies, threshold))
 
 
-def versatile_test(sample_a, sample_b, categorical_threshold=10):
+def versatile_mean_comparizon(sample_a, sample_b, categorical_threshold=5):
     """ Test mean difference of two columns using a series of tests to
     determine the most appropriate final test """
-    if is_categorical(sample_a):
-        if not is_categorical(sample_b):
+    if is_categorical(sample_a, categorical_threshold):
+        if not is_categorical(sample_b, categorical_threshold):
             raise ValueError('Cannot determine if input columns are'
                              'categorical or numerical (number of modalities '
                              '{} and {})'.format(len(np.unique(sample_a)),
@@ -117,14 +117,14 @@ def versatile_test(sample_a, sample_b, categorical_threshold=10):
     return test, p_value
 
 
-def test_means_equality(df_a, df_b, categorical_threshold=5):
+def check_means_equality(df_a, df_b, categorical_threshold=5):
     """ Test pairwise column mean equality with two input DataFrames """
     shared_cols = set(df_a.columns) & set(df_b.columns)
     tests_results = pd.DataFrame(columns=shared_cols,
                                  index=('test', 'p-value'))
     for col in shared_cols:
-        tests_results[col] = versatile_test(df_a[col], df_b[col],
-                                            categorical_threshold)
+        tests_results[col] = versatile_mean_comparizon(df_a[col], df_b[col],
+                                                       categorical_threshold)
     return tests_results
 
 
@@ -137,4 +137,4 @@ if __name__ == '__main__':
     df2 = pd.DataFrame({'bin': np.random.choice(['a', 'b'], size2),
                         'cat': np.random.choice(['a', 'b', 'c'], size2),
                         'num': list(range(size2))})
-    print(test_means_equality(df1, df2).loc['p-value'])
+    print(check_means_equality(df1, df2).loc['p-value'])
