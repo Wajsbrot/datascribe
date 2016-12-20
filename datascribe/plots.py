@@ -4,23 +4,22 @@
 Created on Thu Jan  7 18:37:55 2016
 
 @author: Nicolas Thiebaut
-@email: nthiebaut@quantmetry.com
-@company: Quantmetry
+@email: nkthiebaut@gmail.com
 """
 from math import sqrt, ceil, floor
-import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
-from os.path import basename
+from matplotlib.ticker import FuncFormatter
 import numpy as np
+from os.path import basename
+
+import pandas as pd
+
 from utils import find_categorical
-# plt.style.use('ggplot')
 
 import seaborn as sns
 sns.set(color_codes=True)
 
-
-import matplotlib
-from matplotlib.ticker import FuncFormatter
 
 def to_percent(y, position):
     # Ignore the passed in position. This has the effect of scaling the default
@@ -32,9 +31,10 @@ def to_percent(y, position):
         return s + r'$\%$'
     else:
         return s + '%'
+
+
 formatter = FuncFormatter(to_percent)
 plt.gca().yaxis.set_major_formatter(formatter)
-
 
 
 def is_outlier(points, thresh=3.5):
@@ -52,12 +52,6 @@ def is_outlier(points, thresh=3.5):
     Returns:
     --------
         mask : A numobservations-length boolean array.
-
-    References:
-    ----------
-        Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
-        Handle Outliers", The ASQC Basic References in Quality Control:
-        Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
     """
     if len(points.shape) == 1:
         points = points[:, None]
@@ -71,7 +65,7 @@ def is_outlier(points, thresh=3.5):
     return modified_z_score > thresh
 
 
-def make_plots(infile='../data/sample_ctxoeuv_1.csv', max_modalities=10):
+def make_plots(infile, max_modalities=10):
     """ Plot distribution for features in infile
 
     Parameters
@@ -90,7 +84,7 @@ def make_plots(infile='../data/sample_ctxoeuv_1.csv', max_modalities=10):
 
     # get rid of many-modalities columns
     categorical_cols = [c for c in df[categorical_cols]
-                        if (df[c].value_counts().shape[0] < max_modalities)]
+                        if df[c].value_counts().shape[0] < max_modalities]
 
     numerical_cols = df.select_dtypes(include=['int', 'float']).columns
     numerical_cols = list(set(numerical_cols).difference(categorical_cols))
@@ -113,7 +107,6 @@ def make_plots(infile='../data/sample_ctxoeuv_1.csv', max_modalities=10):
                              figsize=(3*height, 3*width))
 
     for i in range(1, height*width-n+1):
-        print i
         axes[-i, -1].axis('off')  # switch off unused subplots
 
     for i, c in enumerate(categorical_cols):
@@ -129,6 +122,4 @@ def make_plots(infile='../data/sample_ctxoeuv_1.csv', max_modalities=10):
 
 
 if __name__ == '__main__':
-    files = ['../data/sample_adinfo_1.csv', '../data/sample_ctxoeuv_1.csv']
-    for f in files:
-        make_plots(f)
+    make_plots(f)

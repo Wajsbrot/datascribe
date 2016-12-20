@@ -88,9 +88,10 @@ def test_marginal_sums(contingency_table, threshold=5):
     return np.all(np.greater(expected_frequencies, threshold))
 
 
-def versatile_mean_comparizon(sample_a, sample_b, categorical_threshold=5):
-    """ Test mean difference of two columns using a series of tests to
-    determine the most appropriate final test """
+def compare_columns(sample_a, sample_b, categorical_threshold=5):
+    """ Test difference of two columns using a series of tests to
+    determine the most appropriate final test (e.g. chi2 if qualitative,
+    t-test if numerical and homoscedastic, etc.) """
     if is_categorical(sample_a, categorical_threshold):
         if not is_categorical(sample_b, categorical_threshold):
             raise ValueError('Cannot determine if input columns are'
@@ -117,14 +118,14 @@ def versatile_mean_comparizon(sample_a, sample_b, categorical_threshold=5):
     return test, p_value
 
 
-def check_means_equality(df_a, df_b, categorical_threshold=5):
-    """ Test pairwise column mean equality with two input DataFrames """
+def compare_common_columns(df_a, df_b, categorical_threshold=5):
+    """ Test pairwise column difference with two input DataFrames """
     shared_cols = set(df_a.columns) & set(df_b.columns)
     tests_results = pd.DataFrame(columns=shared_cols,
                                  index=('test', 'p-value'))
     for col in shared_cols:
-        tests_results[col] = versatile_mean_comparizon(df_a[col], df_b[col],
-                                                       categorical_threshold)
+        tests_results[col] = compare_columns(df_a[col], df_b[col],
+                                             categorical_threshold)
     return tests_results
 
 
@@ -137,4 +138,4 @@ if __name__ == '__main__':
     df2 = pd.DataFrame({'bin': np.random.choice(['a', 'b'], size2),
                         'cat': np.random.choice(['a', 'b', 'c'], size2),
                         'num': list(range(size2))})
-    print(check_means_equality(df1, df2).loc['p-value'])
+    print(compare_common_columns(df1, df2).loc['p-value'])

@@ -13,8 +13,7 @@ from os.path import join, basename
 from utils import find_categorical
 
 
-def make_audit_file(infile='../data/sample_adinfo_1.csv', desc_file=None,
-                    desc_dir='../out'):
+def make_audit_file(infile, desc_file=None, desc_dir='./out'):
     """ Generate a description file for datas in a csv file
 
     Parameters
@@ -93,6 +92,4 @@ def make_audit_file(infile='../data/sample_adinfo_1.csv', desc_file=None,
 
 
 if __name__ == '__main__':
-    files = ['../data/sample_adinfo_1.csv', '../data/sample_ctxoeuv_1.csv']
-    for f in files:
-        make_audit_file(f)
+    make_audit_file(f)

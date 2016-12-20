@@ -8,7 +8,7 @@ Created on the 19/12/16
 import numpy as np
 import pandas as pd
 
-from app.utils import versatile_mean_comparizon, check_means_equality
+from app.utils import compare_columns, compare_common_columns
 
 binary = [1, 0, 1, 0, 1, 0]
 categorical = [0, 1, 2, 3, 4]
@@ -29,13 +29,11 @@ class TestStatisticalTests(object):
         """ Check extreme cases of mean comparizon """
         for sample in [binary, categorical, numerical]:
             sample_series = pd.Series(sample)
-            assert versatile_mean_comparizon(sample_series,
-                                             sample_series)[1] == 1
+            assert compare_columns(sample_series, sample_series)[1] == 1
             dummy_sample = pd.Series([0]*(len(sample)))
-            assert versatile_mean_comparizon(sample_series,
-                                             dummy_sample)[1] < 0.5
+            assert compare_columns(sample_series, dummy_sample)[1] < 0.5
 
     def test_multiple_mean_comparizons(self):
         """ Check pairwise columns means equality tests """
-        test = check_means_equality(df1, df1)
+        test = compare_common_columns(df1, df1)
         assert test.loc['p-value'].values.all() == 1
