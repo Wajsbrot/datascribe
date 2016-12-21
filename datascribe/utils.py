@@ -1,11 +1,9 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Wed Jan 20 10:12:33 2016
 
 @author: Nicolas Thiebaut
 @email: nkthiebaut@gmail.com
-@company: Quantmetry
 """
 
 import logging

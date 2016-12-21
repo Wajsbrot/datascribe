@@ -4,29 +4,24 @@
 Created on Wed Jan  6 18:49:02 2016
 
 @author: Nicolas Thiebaut
-@email: nthiebaut@quantmetry.com
-@company: Quantmetry
+@email: nkthiebaut@gmail.com
 """
 
-import pandas as pd
 from os.path import join, basename
+import pandas as pd
 from utils import find_categorical
 
 
-def make_audit_file(infile, desc_file=None, desc_dir='./out'):
+def audit_dataframe(df, n_top_values=10):
     """ Generate a description file for datas in a csv file
 
     Parameters
     ----------
-    infile: str
-        csv file containing data
-    desc_file: str
-        csv file in which output is written
-    desc_dir: str
-        directory where description file is written
+    df: pandas.DataFrame
+        input dataframe
 
     """
-    def top_values(df, n_values=5, sep=', ', with_count=True):
+    def top_values(df, n_values=10, sep=', ', with_count=True):
         """ Retrieve most represented modalities for each column of a dataframe
 
         Parameters
@@ -60,22 +55,14 @@ def make_audit_file(infile, desc_file=None, desc_dir='./out'):
             ds = ds.append(pd.Series([out], index=[col_name]))
         return ds
 
-    if desc_file is None:
-        desc_file = join(desc_dir, basename(infile)[:-4] + '_desc.csv')
-
-    df = pd.read_csv(infile, sep=';', decimal=',')
-
     raw_desc = df.describe(include='all').T
-    # raw_desc.rename(columns={'': 'col_name'}, inplace=True)
 
     null_percent = 100 * df.isnull().sum() / df.shape[0]
     null_percent = null_percent.to_frame(name='null_percent')
 
-    # types = df.dtypes.to_frame(name='types')
-
     nunique = df.apply(pd.Series.nunique).to_frame(name='n_unique')
 
-    top = top_values(df).to_frame(name='top_10')
+    top = top_values(df, n_top_values).to_frame(name='top_'+str(n_top_values))
 
     cat_cols = find_categorical(df)
     col_type = pd.Series(raw_desc.index, index=raw_desc.index,
@@ -88,8 +75,24 @@ def make_audit_file(infile, desc_file=None, desc_dir='./out'):
     kept_columns = ['col_type', 'null_percent', 'n_unique', 'mean',
                     'min', 'max', 'top_10']
 
-    desc[kept_columns].to_csv(desc_file, sep=';', float_format='%.2f')
+    return desc[kept_columns]
 
 
-if __name__ == '__main__':
-    make_audit_file(f)
+def make_audit_file(infile, desc_file=None, desc_dir='./out'):
+    """ Generate a description file for datas in a csv file
+
+    Parameters
+    ----------
+    infile: str
+        csv file containing data
+    desc_file: str
+        csv file in which output is written
+    desc_dir: str
+        directory where description file is written
+
+    """
+    if desc_file is None:
+        desc_file = join(desc_dir, basename(infile)[:-4] + '_desc.csv')
+
+    df = pd.read_csv(infile, sep=';', decimal=',')
+    audit_dataframe(df).to_csv(desc_file, sep=';', float_format='%.2f')
