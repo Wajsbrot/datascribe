@@ -5,7 +5,6 @@ DataScribe
 General csv, excel files, or pandas DataFrame exploration scripts and python utils. 
 Includes descriptive statistics, versatile hypothesis testing and correlations analysis.
 
-
 -------------------
 Installation
 -------------------
@@ -34,12 +33,20 @@ Package use in a python code
 
 .. code-block:: python
 
-    from datascribe.utils import check_means_equality
-    df = check_means_equality(df_a, df_b)
+    from datascribe.stats import compare_common_columns
+    df = compare_common_columns(df_a, df_b)
 
 Scripts usage
 
 .. code-block:: bash
 
-    python audit.py file.csv
+    audit.py my_file.csv
+
+To use scripts one should add the scripts folder to the PATH 
+environment variable, and to make the scripts executable with
+
+.. code-block:: bash
+ 
+    chmod +x /path_to_datascribe/scripts/*
+
 
