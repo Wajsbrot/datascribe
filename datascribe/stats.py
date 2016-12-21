@@ -11,7 +11,9 @@ import numpy as np
 import pandas as pd
 from scipy.stats import shapiro, f, ttest_ind
 from scipy.stats import contingency, chi2_contingency, fisher_exact
-from .utils import is_categorical
+from utils import is_categorical
+
+logging.config.fileConfig('logging.ini')
 
 
 def test_normality(sample, alpha=0.05):
@@ -71,7 +73,7 @@ def compare_columns(sample_a, sample_b, categorical_threshold=5):
                              '{} and {})'.format(len(np.unique(sample_a)),
                                                  len(np.unique(sample_b))))
         contingency_table = create_contingency_table(sample_a, sample_b)
-        logging.info("Contingency Table: "+str(contingency_table))
+        logging.info("Contingency Table:\n"+str(contingency_table))
         test = "chi2"
         if test_marginal_sums(contingency_table):
             _, p_value, _, _ = chi2_contingency(contingency_table,
@@ -86,7 +88,8 @@ def compare_columns(sample_a, sample_b, categorical_threshold=5):
         test = "student"
         # If variances are not equal: Welsch test instead of Student's
         use_welsch = test_variances_equality(sample_a, sample_b)
-        _, p_value = ttest_ind(sample_a, sample_b, int(use_welsch))
+        _, p_value = ttest_ind(sample_a, sample_b, int(use_welsch),
+                               nan_policy='omit')
 
     return test, p_value
 
@@ -97,17 +100,20 @@ def compare_common_columns(df_a, df_b, categorical_threshold=5):
     tests_results = pd.DataFrame(columns=shared_cols,
                                  index=('test', 'p-value'))
     for col in shared_cols:
+        logging.info("Columns compared: "+col)
         tests_results[col] = compare_columns(df_a[col], df_b[col],
                                              categorical_threshold)
     return tests_results
 
 
 if __name__ == '__main__':
-    size1 = 10
-    size2 = 10
+    size1 = 15
+    size2 = 15
+    num = list(range(size1-1))
+    num.append(np.nan)
     df1 = pd.DataFrame({'bin': np.random.choice(['a', 'b'], size1),
                         'cat': np.random.choice(['a', 'b', 'c'], size1),
-                        'num': list(range(size1))
+                        'num': num
                         })
     df2 = pd.DataFrame({'bin': np.random.choice(['a', 'b'], size2),
                         'cat': np.random.choice(['a', 'b', 'c'], size2),

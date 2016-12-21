@@ -8,7 +8,7 @@ Created on the 19/12/16
 import numpy as np
 import pandas as pd
 
-from datascribe.utils import compare_columns, compare_common_columns
+from datascribe.stats import compare_columns, compare_common_columns
 
 binary = [1, 0, 1, 0, 1, 0]
 categorical = [0, 1, 2, 3, 4]

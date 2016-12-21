@@ -12,8 +12,8 @@ import pandas as pd
 
 def is_categorical(series, threshold=5):
     """ Return True if the input pandas.Series is categorical """
-    return (series.nunique() <= threshold) or \
-        (not np.issubdtype(series.dtype, np.number))
+    return ((series.nunique() <= threshold) or \
+        (not np.issubdtype(series.dtype, np.number)))
 
 
 def find_categorical(dataframe, threshold=5):

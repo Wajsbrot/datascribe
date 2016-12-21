@@ -5,13 +5,15 @@ Created on the 19/12/16
 @email: nthiebaut@quantmetry.com
 """
 
+import numpy as np
 import pandas as pd
-
 from datascribe.utils import is_categorical
 
 binary = pd.Series([1, 0, 1, 0, 1, 0])
 categorical = pd.Series([0, 1, 2, 3, 4])
-numerical = pd.Series(list(range(20)))
+numerical = list(range(20))
+numerical.append(np.nan)
+numerical = pd.Series(numerical)
 
 
 class TestCategoricalDetection(object):
