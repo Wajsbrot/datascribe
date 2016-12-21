@@ -15,9 +15,18 @@ from scipy.stats import contingency, chi2_contingency, fisher_exact
 
 def is_categorical(series, threshold=5):
     """ Return True if the input pandas.Series is categorical """
-    return ((series.nunique() <= threshold) or (~np.issubdtype(series.dtype,
-                                                               np.number)))
+    return (series.nunique() <= threshold) or \
+        (not np.issubdtype(series.dtype, np.number))
 
+"""
+    if series.nunique() <= threshold:
+        return True
+    try:
+        pd.to_numeric(series)
+    except ValueError:
+        return True
+    return False
+"""
 
 def find_categorical(dataframe, threshold=5):
     """ Find categorical columns in dataframe
@@ -63,8 +72,11 @@ def test_normality(sample, alpha=0.05):
 
 def test_variances_equality(sample_a, sample_b, alpha=0.05):
     """ Return True if inputs variances are equal """
-    variance_ratio = np.var(sample_a)/np.var(sample_b)
-    variance_ratio = max(variance_ratio, 1/variance_ratio)
+    var_a = np.var(sample_a)
+    var_b = np.var(sample_b)
+    if var_a == 0. or var_b == 0.:
+        return False
+    variance_ratio = var_a/var_b if var_a > var_b else var_b/var_a
     return variance_ratio < f.ppf(alpha/2, len(sample_a)-1, len(sample_b)-2)
 
 
@@ -110,8 +122,9 @@ def compare_columns(sample_a, sample_b, categorical_threshold=5):
                 _, p_value, _, _ = chi2_contingency(contingency_table)
     else:  # columns are numerical
         test = "student"
-        _, p_value = ttest_ind(sample_a, sample_b,
-                               test_variances_equality(sample_a, sample_b))
+        # If variances are not equal: Welsch test instead of Student's
+        use_welsch = test_variances_equality(sample_a, sample_b)
+        _, p_value = ttest_ind(sample_a, sample_b, int(use_welsch))
 
     return test, p_value
 
@@ -128,12 +141,14 @@ def compare_common_columns(df_a, df_b, categorical_threshold=5):
 
 
 if __name__ == '__main__':
-    size1 = 20
-    size2 = 20
+    size1 = 10
+    size2 = 10
     df1 = pd.DataFrame({'bin': np.random.choice(['a', 'b'], size1),
                         'cat': np.random.choice(['a', 'b', 'c'], size1),
-                        'num': list(range(size1))})
+                        'num': list(range(size1))
+                        })
     df2 = pd.DataFrame({'bin': np.random.choice(['a', 'b'], size2),
                         'cat': np.random.choice(['a', 'b', 'c'], size2),
-                        'num': list(range(size2))})
-    print(compare_common_columns(df1, df2).loc['p-value'])
+                        'num': list(range(size2))
+                        })
+    print(compare_common_columns(df1, df2))

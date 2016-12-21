@@ -2,10 +2,8 @@
 DataScribe
 ==========
 
--------------------
-Description
--------------------
-General csv files datasets exploration scripts and python utils. 
+General csv, excel files, or pandas DataFrame exploration scripts and python utils. 
+Includes descriptive statistics, versatile hypothesis testing and correlations analysis.
 
 
 -------------------

@@ -9,7 +9,7 @@ Created on Wed Jan  6 18:49:02 2016
 
 from os.path import join, basename
 import pandas as pd
-from utils import find_categorical
+from .utils import find_categorical
 
 
 def audit_dataframe(df, n_top_values=10):

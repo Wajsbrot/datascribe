@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jan  7 18:37:55 2016
@@ -7,34 +6,17 @@ Created on Thu Jan  7 18:37:55 2016
 @email: nkthiebaut@gmail.com
 """
 from math import sqrt, ceil, floor
+import os
+
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 import numpy as np
-from os.path import basename
-
-import pandas as pd
-
-from utils import find_categorical
-
 import seaborn as sns
+
+from .utils import find_categorical
+
 sns.set(color_codes=True)
-
-
-def to_percent(y, position):
-    # Ignore the passed in position. This has the effect of scaling the default
-    # tick locations.
-    s = str(100 * y)
-
-    # The percent symbol needs escaping in latex
-    if matplotlib.rcParams['text.usetex'] is True:
-        return s + r'$\%$'
-    else:
-        return s + '%'
-
-
-formatter = FuncFormatter(to_percent)
-plt.gca().yaxis.set_major_formatter(formatter)
 
 
 def is_outlier(points, thresh=3.5):
@@ -65,20 +47,35 @@ def is_outlier(points, thresh=3.5):
     return modified_z_score > thresh
 
 
-def make_plots(infile, max_modalities=10):
+def make_plots_from_df(df, plot_name='plot', plot_dir='figures',
+                       max_modalities=10):
     """ Plot distribution for features in infile
 
     Parameters
     ----------
-    infile: str
-        input csv file name
+    df: pandas.DataFrame
+        input dataframe
     max_modalities: int
-        maximum number of different values for categoorical features
+        maximum number of different values for categorical features
     """
-    df = pd.read_csv(infile, sep=';', decimal=',')  # , encoding='iso-8859-1')
+    def to_percent(y, position):
+        """ Percent format for matplotlib """
+        s = str(100 * y)
+
+        # The percent symbol needs escaping in latex
+        if matplotlib.rcParams['text.usetex'] is True:
+            return s + r'$\%$'
+        else:
+            return s + '%'
+
+    formatter = FuncFormatter(to_percent)
+    plt.gca().yaxis.set_major_formatter(formatter)
 
     df.dropna(axis=1, how='all', inplace=True)  # remove empty columns
-    df.drop('#rionPaiement', axis=1, inplace=True)  # remove mono-modality cols
+    for col in df.columns:
+        if col.nunique() < 2:
+            # remove mono-modality cols
+            df.drop(col, axis=1, inplace=True)
 
     categorical_cols = find_categorical(df)
 
@@ -96,7 +93,9 @@ def make_plots(infile, max_modalities=10):
                        (df != 0)].dropna(axis=1, how='all').hist(
                        figsize=(20, 20), normed=True)
 
-    plt.savefig('../figures/'+basename(infile)[:-4]+'_numerical.png')
+    if not os.path.exists(plot_dir):
+        os.mkdir(plot_dir)
+    plt.savefig(os.path.join(plot_dir, plot_name+'_numerical.png'))
     plt.clf()
 
     # ----- Plot categorical features ----
@@ -118,8 +117,4 @@ def make_plots(infile, max_modalities=10):
         axes[x, y].yaxis.set_major_formatter(formatter)
         axes[x, y].set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.])
     fig.tight_layout()
-    plt.savefig('../figures/'+basename(infile[:-4])+'_categorical.png')
-
-
-if __name__ == '__main__':
-    make_plots(f)
+    plt.savefig(os.path.join(plot_dir, plot_name+'_categorical.png'))
