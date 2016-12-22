@@ -11,9 +11,9 @@ import numpy as np
 import pandas as pd
 from scipy.stats import shapiro, f, ttest_ind
 from scipy.stats import contingency, chi2_contingency, fisher_exact
-from utils import is_categorical
+from .utils import is_categorical
 
-logging.config.fileConfig('logging.ini')
+# logging.config.fileConfig('logging.ini', disable_existing_loggers=False)
 
 
 def test_normality(sample, alpha=0.05):
@@ -107,7 +107,7 @@ def compare_common_columns(df_a, df_b, categorical_threshold=5):
 
 
 if __name__ == '__main__':
-    size1 = 15
+    size1 = 10
     size2 = 15
     num = list(range(size1-1))
     num.append(np.nan)
