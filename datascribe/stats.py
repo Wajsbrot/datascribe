@@ -7,13 +7,15 @@ Created on Wed Jan 20 10:12:33 2016
 """
 
 import logging
+from os import path
 import numpy as np
 import pandas as pd
 from scipy.stats import shapiro, f, ttest_ind
 from scipy.stats import contingency, chi2_contingency, fisher_exact
 from .utils import is_categorical
 
-# logging.config.fileConfig('logging.ini', disable_existing_loggers=False)
+working_dir = path.dirname(path.abspath(__file__))
+logging.config.fileConfig(path.join(working_dir, 'logging.ini'))
 
 
 def test_normality(sample, alpha=0.05):
@@ -49,7 +51,8 @@ def create_contingency_table(sample_a, sample_b):
     counts_a = pd.Series(sample_a).value_counts().sort_index()
     counts_b = pd.Series(sample_b).value_counts().sort_index()
     if len(set(counts_a.index) & set(counts_b.index)) == 0:
-        raise ValueError('The two columns contain different modalities')
+        logging.info('Contingency table creation: The two columns contain '
+                     'different modalities')
     contingency_table = pd.concat([counts_a, counts_b], axis=1).fillna(0.)
     return contingency_table
 
@@ -73,7 +76,7 @@ def compare_columns(sample_a, sample_b, categorical_threshold=5):
                              '{} and {})'.format(len(np.unique(sample_a)),
                                                  len(np.unique(sample_b))))
         contingency_table = create_contingency_table(sample_a, sample_b)
-        logging.info("Contingency Table:\n"+str(contingency_table))
+        logging.debug("Contingency Table:\n"+str(contingency_table))
         test = "chi2"
         if test_marginal_sums(contingency_table):
             _, p_value, _, _ = chi2_contingency(contingency_table,
@@ -100,7 +103,7 @@ def compare_common_columns(df_a, df_b, categorical_threshold=5):
     tests_results = pd.DataFrame(columns=shared_cols,
                                  index=('test', 'p-value'))
     for col in shared_cols:
-        logging.info("Columns compared: "+col)
+        logging.debug("Columns compared: "+col)
         tests_results[col] = compare_columns(df_a[col], df_b[col],
                                              categorical_threshold)
     return tests_results
