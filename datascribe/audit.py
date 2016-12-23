@@ -7,9 +7,15 @@ Created on Wed Jan  6 18:49:02 2016
 @email: nkthiebaut@gmail.com
 """
 
+import logging
+from os import path
 from os.path import join, basename
+from openpyxl import load_workbook
 import pandas as pd
 from .utils import find_categorical
+
+working_dir = path.dirname(path.abspath(__file__))
+logging.config.fileConfig(path.join(working_dir, 'logging.ini'))
 
 
 def audit_dataframe(df, n_top_values=10):
@@ -96,3 +102,28 @@ def make_audit_file(infile, desc_file=None, desc_dir='./out'):
 
     df = pd.read_csv(infile, sep=';', decimal=',')
     audit_dataframe(df).to_csv(desc_file, sep=';', float_format='%.2f')
+
+
+def audit_all_sheets(excelfile, **kwargs):
+    """ Creates audit sheets for all sheets present in Excel file
+
+    Parameters:
+    -----------
+    excelfile: str
+        input excel file name
+    **kwargs: keyword arguments
+        parameters passed to the pandas.DataFrame.to_excel function call"""
+
+    book = load_workbook(excelfile)
+    writer = pd.ExcelWriter(excelfile, engine='openpyxl')
+    writer.book = book
+    writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+    for ws in book.worksheets:
+        sheet_title = 'Audit_'+ws.title
+        if len(sheet_title) > 31:
+            # Sheet title cropped to 31 characters to avoid Excel limitation
+            sheet_title = sheet_title[:31]
+        logging.info('Creating sheet ' + sheet_title)
+        audit = audit_dataframe(pd.read_excel(excelfile))
+        audit.to_excel(writer, sheet_title, **kwargs)
+    writer.save()
