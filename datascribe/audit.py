@@ -7,6 +7,7 @@ Created on Wed Jan  6 18:49:02 2016
 @email: nkthiebaut@gmail.com
 """
 
+from collections import OrderedDict
 import logging
 from os import path
 from os.path import join, basename
@@ -118,12 +119,15 @@ def audit_all_sheets(excelfile, **kwargs):
     writer = pd.ExcelWriter(excelfile, engine='openpyxl')
     writer.book = book
     writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+    new_sheets = OrderedDict()
     for ws in book.worksheets:
         sheet_title = 'Audit_'+ws.title
         if len(sheet_title) > 31:
             # Sheet title cropped to 31 characters to avoid Excel limitation
             sheet_title = sheet_title[:31]
         logging.info('Creating sheet ' + sheet_title)
-        audit = audit_dataframe(pd.read_excel(excelfile))
+        audit = audit_dataframe(pd.read_excel(excelfile, sheetname=ws.title))
+        new_sheets[sheet_title] = audit
+    for sheet_title, audit in new_sheets.items():
         audit.to_excel(writer, sheet_title, **kwargs)
     writer.save()

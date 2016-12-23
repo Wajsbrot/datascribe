@@ -77,8 +77,8 @@ def compare_columns(sample_a, sample_b, categorical_threshold=5):
                                                  len(np.unique(sample_b))))
         contingency_table = create_contingency_table(sample_a, sample_b)
         logging.debug("Contingency Table:\n"+str(contingency_table))
-        test = "chi2"
         if test_marginal_sums(contingency_table):
+            test = "chi2"
             _, p_value, _, _ = chi2_contingency(contingency_table,
                                                 correction=False)
         else:
@@ -86,11 +86,12 @@ def compare_columns(sample_a, sample_b, categorical_threshold=5):
                 test = "fisher_exact"
                 _, p_value = fisher_exact(contingency_table)
             else:
+                test = "chi2_corrected"
                 _, p_value, _, _ = chi2_contingency(contingency_table)
     else:  # columns are numerical
-        test = "student"
         # If variances are not equal: Welsch test instead of Student's
         use_welsch = test_variances_equality(sample_a, sample_b)
+        test = "welsch" if use_welsch else "student"
         _, p_value = ttest_ind(sample_a, sample_b, int(use_welsch),
                                nan_policy='omit')
 
@@ -106,7 +107,7 @@ def compare_common_columns(df_a, df_b, categorical_threshold=5):
         logging.debug("Columns compared: "+col)
         tests_results[col] = compare_columns(df_a[col], df_b[col],
                                              categorical_threshold)
-    return tests_results
+    return tests_results.T
 
 
 if __name__ == '__main__':

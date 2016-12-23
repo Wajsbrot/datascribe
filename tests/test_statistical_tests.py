@@ -36,4 +36,4 @@ class TestStatisticalTests(object):
     def test_multiple_mean_comparizons(self):
         """ Check pairwise columns means equality tests """
         test = compare_common_columns(df1, df1)
-        assert test.loc['p-value'].values.all() == 1
+        assert test['p-value'].values.all() == 1
