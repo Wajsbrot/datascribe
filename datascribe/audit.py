@@ -8,7 +8,7 @@ Created on Wed Jan  6 18:49:02 2016
 """
 
 from collections import OrderedDict
-import logging
+import logging.config
 from os import path
 from os.path import join, basename
 from openpyxl import load_workbook

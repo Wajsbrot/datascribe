@@ -73,7 +73,7 @@ def make_plots_from_df(df, plot_name='plot', plot_dir='figures',
 
     df.dropna(axis=1, how='all', inplace=True)  # remove empty columns
     for col in df.columns:
-        if col.nunique() < 2:
+        if df[col].nunique() < 2:
             # remove mono-modality cols
             df.drop(col, axis=1, inplace=True)
 
