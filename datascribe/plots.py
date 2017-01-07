@@ -26,14 +26,16 @@ def is_outlier(points, thresh=3.5):
 
     Parameters:
     -----------
-        points : An numobservations by numdimensions array of observations
-        thresh : The modified z-score to use as a threshold. Observations with
-            a modified z-score (based on the median absolute deviation) greater
-            than this value will be classified as outliers.
+    points : array
+        An numobservations by numdimensions array of observations
+    thresh : float
+        The modified z-score to use as a threshold. Observations with
+        a modified z-score (based on the median absolute deviation) greater
+        than this value will be classified as outliers.
 
     Returns:
     --------
-        mask : A numobservations-length boolean array.
+    array[bool]: A numobservations-length boolean array (mask).
     """
     if len(points.shape) == 1:
         points = points[:, None]
@@ -89,9 +91,10 @@ def make_plots_from_df(df, plot_name='plot', plot_dir='figures',
     # sns.pairplot(df[numerical_cols], size=5)
 
     # ----- Plot numerical features ----
-    df[numerical_cols][(df >= df.quantile(0.1)) & (df <= df.quantile(0.9)) &
-                       (df != 0)].dropna(axis=1, how='all').hist(
-                       figsize=(20, 20), normed=True)
+    num_df = df[numerical_cols]
+    num_df[(num_df >= num_df.quantile(0.1)) & (num_df <= num_df.quantile(0.9)) &
+           (num_df != 0)].dropna(axis=0, how='any').hist(figsize=(20, 20), 
+                                                         normed=True)
 
     if not os.path.exists(plot_dir):
         os.mkdir(plot_dir)
