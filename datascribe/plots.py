@@ -16,6 +16,9 @@ import seaborn as sns
 
 from .utils import find_categorical
 
+LOWER_QUANTILE_OUTLIERS = 0.05
+UPPER_QUANTILE_OUTLIERS = 0.95
+
 sns.set(color_codes=True)
 
 
@@ -50,8 +53,8 @@ def is_outlier(points, thresh=3.5):
 
 
 def make_plots_from_df(df, plot_name='plot', plot_dir='figures',
-                       max_modalities=10):
-    """ Plot distribution for features in infile
+                       max_modalities=10, outlier_detector='quantile'):
+    """ Plot pandas.DataFrame variables distribution
 
     Parameters
     ----------
@@ -63,6 +66,8 @@ def make_plots_from_df(df, plot_name='plot', plot_dir='figures',
         output plot directory name
     max_modalities: int
         maximum number of different values for categorical features
+    outlier_detector: str
+        method used for outliers detector, can be 'gaussian' or 'quantile'
     """
     def to_percent(y, position):
         """ Percent format for matplotlib """
@@ -94,9 +99,20 @@ def make_plots_from_df(df, plot_name='plot', plot_dir='figures',
 
     # ----- Plot numerical features ----
     num_df = df[numerical_cols]
-    num_df[(num_df >= num_df.quantile(0.1)) & (num_df <= num_df.quantile(0.9)) &
-           (num_df != 0)].dropna(axis=0, how='any').hist(figsize=(20, 20), 
-                                                         normed=True)
+    if outlier_detector == 'quantile':
+        non_outliers_mask = \
+            (num_df >= num_df.quantile(LOWER_QUANTILE_OUTLIERS)) & \
+            (num_df <= num_df.quantile(UPPER_QUANTILE_OUTLIERS))
+    elif outlier_detector == 'gaussian':
+        # TODO add support for other outlier detector
+        raise NotImplementedError('Gaussian outlier detector is not'
+                                  ' implemented yet')
+    else:
+        raise ValueError('Outlier detection method unknown '
+                         '({})'.format(outlier_detector))
+
+    num_df[non_outliers_mask].dropna(axis=0, how='any').hist(figsize=(20, 20),
+                                                             normed=True)
 
     if not os.path.exists(plot_dir):
         os.mkdir(plot_dir)
