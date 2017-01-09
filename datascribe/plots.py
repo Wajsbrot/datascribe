@@ -57,6 +57,10 @@ def make_plots_from_df(df, plot_name='plot', plot_dir='figures',
     ----------
     df: pandas.DataFrame
         input dataframe
+    plot_name: str
+        plot files prefix
+    plot_dir: str
+        output plot directory name
     max_modalities: int
         maximum number of different values for categorical features
     """
@@ -87,8 +91,6 @@ def make_plots_from_df(df, plot_name='plot', plot_dir='figures',
 
     numerical_cols = df.select_dtypes(include=['int', 'float']).columns
     numerical_cols = list(set(numerical_cols).difference(categorical_cols))
-
-    # sns.pairplot(df[numerical_cols], size=5)
 
     # ----- Plot numerical features ----
     num_df = df[numerical_cols]

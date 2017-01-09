@@ -2,7 +2,7 @@
 """
 Created on the 19/12/16
 @author: Nicolas Thiebaut
-@email: nthiebaut@quantmetry.com
+@email: nkthiebaut@gmail.com
 """
 
 import numpy as np

@@ -7,6 +7,8 @@ setup(name='Dataset Description',
       description='General csv files dataset exploration',
       author='Nicolas Thiebaut',
       author_email='nkthiebaut@gmail.com',
+      setup_requires=['pytest-runner'],
+      tests_require=['pytest'],
       url='https://github.com/wajsbrot',
      )
 
